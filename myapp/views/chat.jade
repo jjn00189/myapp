@@ -1,0 +1,34 @@
+doctype html
+html
+	head
+		script(src="/jquery/jquery-1.9.1.min.js")
+		script(src="/jquery/jquery-1.9.1.js")
+		script(src="/js/socket.io.js")
+		script(src="/js/chat.js")
+		link(rel="stylesheet",href="/css/chat.css")
+	body
+		div(class="box")
+			div(class="left")
+				div(class="left_top")
+					h1 你画我猜1.0
+					div(id ="name")='当前用户：'+name
+					div(id ="people_num")
+					h4 用户列表
+					div(id ="list")
+				div(class="left_down")
+					h2 倒计时 
+					h2 提示
+					h2
+			div(class="content")
+				canvas(id="zone",width = "600px" height = "500px")
+				button(id="clearbtn") 清空	
+				button(id="start") 游戏开始
+			div(class="right")
+				div(class="chatcontent")
+					textarea(cols ="33",rows="31",disabled="disabled")
+				input(id="sendTxt",type="text")
+				button(id="sendBtn") 发送
+				
+	script(src="/js/paint.js")
+	script.
+		var clientname = '#{name}';

@@ -1,0 +1,48 @@
+body{
+	margin: 0px;
+	padding: 0px;
+}
+.box{
+	width: 1100px;
+	margin: auto;
+	background-color: #cccccc;
+	height: 550px;
+	margin-top: 50px;
+}
+.left{
+	width: 200px;
+	height: 500px;
+	float: left;
+	margin-left: 10px;
+	border: solid 1px black;
+	background-color: #EEEE00;
+}
+
+.left_top{
+	width: 200px;
+	height: 300px;
+}
+.content{
+	width: 600px;
+	height: 500px;
+	border: solid 1px black;
+	margin-left: 10px;
+	background-color: #FFFFE0;
+	float: left;
+}
+.right{
+	width: 254px;
+	height: 500px;
+	float: left;
+	margin-left: 10px;
+	background-color: #EEC591;
+}
+.chatcontent{
+	width: 254px;
+	height: 480px;
+}
+#clearbtn{
+	float: right;
+}
+
+

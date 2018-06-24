@@ -1,0 +1,12 @@
+doctype html
+html
+	head
+		title= title
+		script(src="/jquery/jquery-1.9.1.min.js")
+		script(src="/js/socket.io.js")
+		script(src="/js/index.js")
+	body
+		h1 Chat room
+		div(id = "people_num")
+		input(id="sendTxt",type="text")
+		button(id="sendBtn") 发送

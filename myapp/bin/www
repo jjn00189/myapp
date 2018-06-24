@@ -1,0 +1,175 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('myapp:server');
+var http = require('http');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+var io = require('socket.io')(server);
+
+var userlist = [];
+var paint_index=0;
+
+io.on('connection', function(socket){
+    
+    var mes = {};
+    var obj={};
+    socket.on('clientname', function (str) {
+        socket.nickname = str;
+        //用户进入信息
+        mes.str = socket.nickname +' come in'
+        io.emit('enter', mes)
+        // 用户列表
+        obj.username = socket.nickname;
+        obj.id = socket.id;
+        if(userlist.length == 0){
+            paint_index = 0;
+        }
+        userlist.push(obj);
+        io.emit('userlist', userlist)
+    })
+
+    socket.on('message', function (str) {
+        // 聊天信息
+        mes.str = socket.nickname + ' says: ' + str
+        io.emit('message',mes);
+    })
+
+    socket.on('disconnect',function(){
+        //用户离开
+        mes.str = socket.nickname + ' left'
+        io.emit('leave',mes)
+        userlist.removeByValue(socket.nickname)
+        io.emit('userlist', userlist)     
+    })
+
+    socket.on('paint_start',function(data){
+        socket.broadcast.emit("paint_start",data); 
+    })
+
+    socket.on('paint_ing',function(data){
+        socket.broadcast.emit("paint_ing",data); 
+    })
+    
+    socket.on('clearPaint',function(data){
+        socket.broadcast.emit("clearPaint","cc");
+    })
+
+    var gamestatus = {}
+    socket.on("gamestatus",function(data){
+        //console.log(socket.id  + paint_index);
+        if(paint_index >= userlist.length){
+            gamestatus.type = "end";
+            gamestatus.str = "本轮结束";
+            io.emit("gamestatus",gamestatus);
+            paint_index = 0;
+        }
+        else if(socket.id ==userlist[paint_index].id && data.index == paint_index){
+            gamestatus.type = "ing";
+            gamestatus.index = paint_index;
+            gamestatus.str = "你正在画画";
+            gamestatus.answer = getAnswer();
+            socket.emit("gamestatus",gamestatus);
+
+            gamestatus.str = userlist[paint_index].username + "正在画画";
+            socket.broadcast.emit("gamestatus",gamestatus);
+            paint_index++;
+        }
+    })
+});
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
+
+
+Array.prototype.removeByValue = function(val) {
+  for(var i=0; i<this.length; i++) {
+    if(this[i].username == val) {
+      this.splice(i, 1);
+      break;
+    }
+  }
+}
+
+function getAnswer(){
+    return {str:"苹果", length:"两个字","type":"水果"}
+}
